@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 
 
-class Session private constructor(context: Context) {
+class Session private constructor(context: Context?) {
     private val sharedPreferences: SharedPreferences
 
     init {
-        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences = context!!.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
     fun putString(key: String?, value: String?) {
@@ -45,7 +45,7 @@ class Session private constructor(context: Context) {
         private const val PREFS_NAME = "MyPrefs"
         private var instance: Session? = null
         @Synchronized
-        fun getInstance(context: Context): Session? {
+        fun getInstance(context: Context?): Session? {
             if (instance == null) {
                 instance = Session(context)
             }

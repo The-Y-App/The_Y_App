@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.ScalingLevel
 
-class SessionViewModel(context: Context) : ViewModel() {
+class SessionViewModel(context: Context?) : ViewModel() {
     private val session: Session = Session.getInstance(context)!!
 
     val apiKey: State<String> = mutableStateOf(session.getString("apiKey", "undefined")!!)

@@ -58,6 +58,7 @@ class HomeActivity : ComponentActivity() {
     @Composable
     fun HomeScreen(sessionViewModel: SessionViewModel, postViewModel: PostViewModel) {
         val darkMode by sessionViewModel.darkMode
+        val scaling by sessionViewModel.scale
         val username by sessionViewModel.username
         val profilePicture by sessionViewModel.profilePicture
 
@@ -84,7 +85,7 @@ class HomeActivity : ComponentActivity() {
                     )
                     Text(
                         text = "y",
-                        color = Color.White,
+                        color = if (darkMode) Color.White else Color.Black,
                         fontSize = 30.sp,
                         fontFamily = LogoFontFamily,
                         modifier =
@@ -99,15 +100,15 @@ class HomeActivity : ComponentActivity() {
 
                 Text(
                     text = "Welcome Back $username",
-                    color = if(darkMode) Color.Blue
-                    else Color.Yellow,
+                    color = if(darkMode) Color.White
+                    else Color.Black,
                     modifier = Modifier.padding(start = 0.dp)
                 )
 
                 Spacer(modifier = Modifier
                     .height(1.dp)
                     .fillMaxWidth()
-                    .background(Color.White))
+                    .background(if (darkMode) Color.White else Color.Black))
                 NavHost(
                     navController,
                     startDestination = "Home",

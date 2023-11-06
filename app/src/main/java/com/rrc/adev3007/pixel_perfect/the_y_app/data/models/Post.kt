@@ -18,7 +18,7 @@ data class Post(
 data class CreatePostRequest(
     @SerializedName("api_key")
     val apiKey: String,
-    val email: String,
+    val username: String,
     val content: String,
     @SerializedName("media_id")
     val mediaId: Int?

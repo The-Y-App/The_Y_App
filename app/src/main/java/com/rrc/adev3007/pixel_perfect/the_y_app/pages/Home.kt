@@ -47,7 +47,8 @@ fun Home(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
                         bottom = 10.dp,
                         start = 16.dp,
                         end = 16.dp
-                    )
+                    ),
+                viewModel = sessionViewModel
             )
             Spacer(
                 modifier = Modifier

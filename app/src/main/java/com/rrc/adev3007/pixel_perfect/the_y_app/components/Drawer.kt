@@ -139,18 +139,6 @@ fun Drawer(viewModel: SessionViewModel) {
                     onCheckedChange = { viewModel.toggleDarkMode() }
             )
             SettingToggle(
-                    text = "Auto Play",
-                    initialChecked = autoplay,
-                    onCheckedChange = { viewModel.toggleAutoplay() },
-                    fontSize =
-                            when (scale) {
-                                ScalingLevel.Small -> 10.sp
-                                ScalingLevel.Normal -> 12.sp
-                                else -> 14.sp
-                            },
-                    color = if (darkMode) Color.White else Color.Black
-            )
-            SettingToggle(
                     text = "Profanity Filter",
                     initialChecked = profanityFilter,
                     onCheckedChange = { viewModel.toggleProfanityFilter() },
