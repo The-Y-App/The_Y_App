@@ -41,7 +41,7 @@ interface ISynchronizer {
     suspend fun postMedia(@Body createMedia: Media.MediaCreate) : Response<Media.MediaCreateResponse>
 }
 
-private const val BASE_URL = "https://the-y-app-api.azurewebsites.net/api/"
+private const val BASE_URL = "http://192.168.100.101:5000/api/"
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(GsonConverterFactory.create())
