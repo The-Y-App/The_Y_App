@@ -199,11 +199,11 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
                         if(userViewModel.validateForm()) {
                             coroutineScope.launch {
                                 val user = UserCreate(
-                                    userViewModel.username,
-                                    userViewModel.email,
-                                    userViewModel.firstName,
-                                    userViewModel.lastName,
-                                    userViewModel.password
+                                    username = userViewModel.username,
+                                    email = userViewModel.email,
+                                    firstName = userViewModel.firstName,
+                                    lastName = userViewModel.lastName,
+                                    password = userViewModel.password
                                 )
                                 val response = Synchronizer.api.postUser(user)
                                 if (response.isSuccessful) {
@@ -213,16 +213,17 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
                                     activity.finish()
                                     activity.startActivity(navigate)
                                 } else {
-                                    Log.e("loginError", response.code().toString())
-                                    if (response.code() == 416) {
+                                    if (response.code() == 409) {
                                         val updatedErrors = userViewModel.errors.toMutableMap()
                                         updatedErrors["username"] = "Username already in use"
                                         userViewModel.errors = updatedErrors
                                     }
 
-                                    if(response.code() == 409){
-                                        val updateErrors = userViewModel.errors.toMutableMap()
-                                        updateErrors["email"] = "Email already in use"
+                                    if(response.code() == 416){
+                                        Log.i("loginError", "hello world")
+                                        val updatedErrors = userViewModel.errors.toMutableMap()
+                                        updatedErrors["email"] = "Email already in use"
+                                        userViewModel.errors = updatedErrors
                                     }
 
                                     if (response.code() == 400) {
@@ -230,6 +231,7 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
                                         updatedErrors["fields"] = "Required Fields are Missing"
                                         userViewModel.errors = updatedErrors
                                     }
+                                    Log.e("loginError", response.code().toString())
                                 }
                             }
                         }
