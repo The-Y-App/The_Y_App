@@ -5,9 +5,9 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.CreatePostRequest
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.Media
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAccount
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuth
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuthRequest
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserCreate
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserProfilePicture
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -30,6 +30,9 @@ interface ISynchronizer {
 
     @POST("login")
     suspend fun postLogin(@Body loginAuth: UserAuth ) : Response<UserAccount>
+
+    @POST("logout")
+    suspend fun postLogout(@Body data: UserAuthRequest): Response<Any>
 
     @PUT("user")
     suspend fun postUser(@Body createUser: UserCreate) : Response<Any>

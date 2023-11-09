@@ -1,5 +1,6 @@
 package com.rrc.adev3007.pixel_perfect.the_y_app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -49,6 +50,10 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val postViewModel = PostViewModel()
         val sessionViewModel = SessionViewModel(applicationContext)
+        sessionViewModel.logoutCallback = {
+            startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
+            finish()
+        }
         setContent {
             HomeScreen(sessionViewModel, postViewModel)
         }

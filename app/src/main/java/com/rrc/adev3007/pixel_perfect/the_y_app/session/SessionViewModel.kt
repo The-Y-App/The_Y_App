@@ -5,7 +5,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.ScalingLevel
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuthRequest
+import kotlinx.coroutines.launch
 
 class SessionViewModel(context: Context?) : ViewModel() {
     private val session: Session = Session.getInstance(context)!!
@@ -25,6 +29,7 @@ class SessionViewModel(context: Context?) : ViewModel() {
                 ?: ScalingLevel.Normal.toString()
         )
     )
+    var logoutCallback: (() -> Unit)? = null
 
     fun setAPIKey(setAPIKey: String){
         session.putString("apiKey", setAPIKey)
@@ -83,6 +88,12 @@ class SessionViewModel(context: Context?) : ViewModel() {
     }
 
     fun logOut() {
-        session.clearSession()
+        viewModelScope.launch {
+            val response = Synchronizer.api.postLogout(UserAuthRequest(apiKey.value, username.value))
+            if (response.isSuccessful) {
+                session.clearSession()
+                logoutCallback?.invoke()
+            }
+        }
     }
 }

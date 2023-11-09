@@ -22,9 +22,15 @@ data class UserAccount(
 )
 
 data class UserAuth(
-    val username:String,
+    val username: String,
     val password: String
 ) : Serializable
+
+data class UserAuthRequest(
+    @SerializedName("api_key")
+    val apiKey: String,
+    val username: String
+)
 
 data class UserCreate(
     val email: String,
