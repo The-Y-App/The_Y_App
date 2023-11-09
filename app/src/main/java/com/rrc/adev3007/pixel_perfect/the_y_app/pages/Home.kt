@@ -26,7 +26,7 @@ fun Home(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
     var posts by viewModel.homePosts
     LaunchedEffect(Unit) {
         if (posts.isEmpty()) {
-            posts = viewModel.getHomePosts(sessionViewModel.username.value, sessionViewModel.apiKey.value)
+            viewModel.getHomePosts(sessionViewModel.username.value, sessionViewModel.apiKey.value)
         }
     }
     LazyColumn(
