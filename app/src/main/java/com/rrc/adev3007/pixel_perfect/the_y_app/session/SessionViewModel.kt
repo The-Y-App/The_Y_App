@@ -6,9 +6,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rrc.adev3007.pixel_perfect.the_y_app.components.DrawerState
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.ScalingLevel
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuth
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuthRequest
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserCreate
 import kotlinx.coroutines.launch
 
 class SessionViewModel(context: Context?) : ViewModel() {
@@ -29,9 +32,12 @@ class SessionViewModel(context: Context?) : ViewModel() {
                 ?: ScalingLevel.Normal.toString()
         )
     )
+    val loginError: State<String> = mutableStateOf("")
+    val registerErrors: State<Map<String, String>> = mutableStateOf(emptyMap())
+    var loginCallback: (() -> Unit)? = null
     var logoutCallback: (() -> Unit)? = null
 
-    fun setAPIKey(setAPIKey: String){
+    fun setApiKey(setAPIKey: String){
         session.putString("apiKey", setAPIKey)
         (apiKey as MutableState<String>).value = setAPIKey
     }
@@ -51,7 +57,7 @@ class SessionViewModel(context: Context?) : ViewModel() {
     }
 
     fun updateProfilePicture(newProfilePicture : String?){
-        session.putString("profilePicture", newProfilePicture?: null)
+        session.putString("profilePicture", newProfilePicture)
         (profilePicture as MutableState<String?>).value = newProfilePicture
     }
     fun updateUsername(newUsername: String) {
@@ -87,11 +93,84 @@ class SessionViewModel(context: Context?) : ViewModel() {
         (profilePicture as MutableState<String?>).value = picBase64
     }
 
+    fun setLoginError(error: String) {
+        (loginError as MutableState<String>).value = error
+    }
+
+    fun setRegisterErrors(errors: Map<String, String>) {
+        (registerErrors as MutableState<Map<String, String>>).value = errors
+    }
+
+    fun register(formData: UserCreate) {
+        val emailRegex = Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}")
+        val errors = registerErrors.value.toMutableMap()
+
+        if(formData.username.isBlank()) errors["username"] = "Username is required"
+        if (formData.email.isEmpty()) errors["email"] = "Email is required"
+        else if (!emailRegex.matches(formData.email)) errors["email"] = "Invalid email"
+        if (formData.firstName.isBlank()) errors["firstName"] = "First name is required"
+        if (formData.lastName.isBlank()) errors["lastName"] = "Last name is required"
+        if (formData.password.isBlank()) errors["password"] = "Password is required"
+        setRegisterErrors(errors)
+
+        if (registerErrors.value.isEmpty()) {
+            viewModelScope.launch {
+                val response = Synchronizer.api.postUser(formData)
+                if (response.isSuccessful) {
+                    logIn(
+                        UserAuth(
+                            formData.username,
+                            formData.password
+                        )
+                    )
+                } else {
+                    if (response.code() == 409) {
+                        val updatedErrors = registerErrors.value.toMutableMap()
+                        updatedErrors["username"] = "Username already in use"
+                        setRegisterErrors(updatedErrors)
+                    }
+
+                    if(response.code() == 416){
+                        val updatedErrors = registerErrors.value.toMutableMap()
+                        updatedErrors["email"] = "Email already in use"
+                        setRegisterErrors(updatedErrors)
+                    }
+
+                    if (response.code() == 400) {
+                        val updatedErrors = registerErrors.value.toMutableMap()
+                        updatedErrors["fields"] = "Required Fields are Missing"
+                        setRegisterErrors(updatedErrors)
+                    }
+                }
+            }
+        }
+    }
+
+    fun logIn(userAuth: UserAuth) {
+        viewModelScope.launch {
+            val response = Synchronizer.api.postLogin(userAuth)
+            if (response.isSuccessful) {
+                val userAccount = response.body()
+                setApiKey(userAccount?.apiKey.toString())
+                updateUsername(userAuth.username)
+                updateEmail(userAccount?.email.toString())
+                updateFirstName(userAccount?.firstName.toString())
+                updateLastName(userAccount?.lastName.toString())
+                updateScale((ScalingLevel.valueOf(userAccount?.uiScale.toString())))
+                updateProfilePicture(userAccount?.profilePicture)
+                loginCallback?.invoke()
+            } else {
+                setLoginError("Username or password is incorrect!")
+            }
+        }
+    }
+
     fun logOut() {
         viewModelScope.launch {
             val response = Synchronizer.api.postLogout(UserAuthRequest(apiKey.value, username.value))
             if (response.isSuccessful) {
                 session.clearSession()
+                DrawerState.toggleDrawer()
                 logoutCallback?.invoke()
             }
         }
