@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -32,17 +31,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
-import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuth
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserCreate
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
-import kotlinx.coroutines.launch
 
 
 class CreateUserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewModel = SessionViewModel(applicationContext)
+        viewModel.loginCallback = {
+            startActivity(Intent(this@CreateUserActivity, HomeActivity::class.java))
+            finish()
+        }
         setContent {
             CreateUserScreen(viewModel)
         }
@@ -51,13 +51,15 @@ class CreateUserActivity : ComponentActivity() {
 
 @Composable
 fun CreateUserScreen(viewModel: SessionViewModel) {
-    var passwordVisability by remember {
+    var passwordVisibility by remember {
         mutableStateOf(true)
     }
     val activity = LocalContext.current as Activity
-    val coroutineScope = rememberCoroutineScope()
-
-    val userViewModel = remember { CreateUserViewModel() }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -78,15 +80,13 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
         )
         Text(text = "Welcome To Y", fontSize = 24.sp)
         Spacer(modifier = Modifier.padding(bottom = 24.dp))
-        if(userViewModel.errors.isNotEmpty()) ErrorMessages(userViewModel.errors)
+        if(viewModel.registerErrors.value.isNotEmpty()) ErrorMessages(viewModel.registerErrors.value)
         OutlinedTextField(
-            value = userViewModel.username,
+            value = username,
             label = { Text(text = "Username") },
             onValueChange = {
-                userViewModel.username = it
-                val updatedErrors = userViewModel.errors.toMutableMap()
-                updatedErrors.remove("username")
-                userViewModel.errors = updatedErrors
+                username = it
+                viewModel.setRegisterErrors(emptyMap())
             },
             placeholder = { Text(text = "Enter Username") },
             shape = RoundedCornerShape(12.dp),
@@ -96,14 +96,12 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
         )
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
-            value = userViewModel.email,
+            value = email,
             label = { Text(text = "Email") },
             onValueChange = {
-                userViewModel.email = it
-                val updatedErrors = userViewModel.errors.toMutableMap()
-                updatedErrors.remove("email")
-                userViewModel.errors = updatedErrors
-                            },
+                email = it
+                viewModel.setRegisterErrors(emptyMap())
+            },
             placeholder = { Text(text = "Enter Email") },
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -112,13 +110,12 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
         )
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
-            value = userViewModel.firstName,
+            value = firstName,
             label = { Text(text = "First Name") },
             onValueChange = {
-                userViewModel.firstName = it
-                val updatedErrors = userViewModel.errors.toMutableMap()
-                updatedErrors.remove("firstName")
-                userViewModel.errors = updatedErrors},
+                firstName = it
+                viewModel.setRegisterErrors(emptyMap())
+            },
             placeholder = { Text(text = "Enter First Name") },
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -127,13 +124,12 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
         )
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
-            value = userViewModel.lastName,
+            value = lastName,
             label = { Text(text = "Last Name") },
             onValueChange = {
-                userViewModel.lastName = it
-                val updatedErrors = userViewModel.errors.toMutableMap()
-                updatedErrors.remove("lastName")
-                userViewModel.errors = updatedErrors},
+                lastName = it
+                viewModel.setRegisterErrors(emptyMap())
+            },
             placeholder = { Text(text = "Enter Last Name") },
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -142,25 +138,24 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
         )
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
-            value = userViewModel.password,
+            value = password,
             label = { Text(text = "Password") },
             onValueChange = {
-                userViewModel.password = it
-                val updatedErrors = userViewModel.errors.toMutableMap()
-                updatedErrors.remove("password")
-                userViewModel.errors = updatedErrors},
+                password = it
+                viewModel.setRegisterErrors(emptyMap())
+            },
             placeholder = { Text(text = "Enter Password") },
             shape = RoundedCornerShape(12.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordVisability)
+            visualTransformation = if (passwordVisibility)
                 PasswordVisualTransformation()
             else
                 VisualTransformation.None,
             trailingIcon = {
-                if (passwordVisability) {
+                if (passwordVisibility) {
                     IconButton(
                         onClick = {
-                            passwordVisability = false
+                            passwordVisibility = false
                         },
                     ) {
                         Icon(
@@ -171,7 +166,7 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
                 } else {
                     IconButton(
                         onClick = {
-                            passwordVisability = true
+                            passwordVisibility = true
                         },
                     ) {
 
@@ -195,51 +190,17 @@ fun CreateUserScreen(viewModel: SessionViewModel) {
         ) {
             Button(
                 onClick = {
-                    try {
-                        if(userViewModel.validateForm()) {
-                            coroutineScope.launch {
-                                val user = UserCreate(
-                                    username = userViewModel.username,
-                                    email = userViewModel.email,
-                                    firstName = userViewModel.firstName,
-                                    lastName = userViewModel.lastName,
-                                    password = userViewModel.password
-                                )
-                                val response = Synchronizer.api.postUser(user)
-                                if (response.isSuccessful) {
-                                    val createdUser = UserAuth(userViewModel.username, userViewModel.password)
-                                    val navigate = Intent(activity, LoginActivity::class.java)
-                                    navigate.putExtra("CreatedUser", createdUser)
-                                    activity.finish()
-                                    activity.startActivity(navigate)
-                                } else {
-                                    if (response.code() == 409) {
-                                        val updatedErrors = userViewModel.errors.toMutableMap()
-                                        updatedErrors["username"] = "Username already in use"
-                                        userViewModel.errors = updatedErrors
-                                    }
-
-                                    if(response.code() == 416){
-                                        Log.i("loginError", "hello world")
-                                        val updatedErrors = userViewModel.errors.toMutableMap()
-                                        updatedErrors["email"] = "Email already in use"
-                                        userViewModel.errors = updatedErrors
-                                    }
-
-                                    if (response.code() == 400) {
-                                        val updatedErrors = userViewModel.errors.toMutableMap()
-                                        updatedErrors["fields"] = "Required Fields are Missing"
-                                        userViewModel.errors = updatedErrors
-                                    }
-                                    Log.e("loginError", response.code().toString())
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("LoginScreen", "Login failed: ${e.message}")
-                    }
+                    viewModel.register(
+                        UserCreate(
+                            username = username,
+                            email = email,
+                            firstName = firstName,
+                            lastName = lastName,
+                            password = password
+                        )
+                    )
                 },
-                enabled = userViewModel.errors.isEmpty(),
+                enabled = viewModel.registerErrors.value.isEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
