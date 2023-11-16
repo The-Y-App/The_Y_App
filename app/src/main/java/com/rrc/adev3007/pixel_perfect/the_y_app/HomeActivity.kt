@@ -43,6 +43,7 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 * Experimental API's used:
 * androidx.compose.ui.platform.LocalSoftwareKeyboardController:
 *       NewPostForm.kt:62
+*       Search.kt:36
 */
 class HomeActivity : ComponentActivity() {
     @ExperimentalComposeUiApi
@@ -120,7 +121,7 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.weight(1f)
                 ) {
                     composable("Home") { Home(postViewModel, sessionViewModel) }
-                    composable("Search") { Search() }
+                    composable("Search") { Search(postViewModel, sessionViewModel) }
                     composable("Dislikes") { Dislikes() }
                 }
                 BottomNavBar(
