@@ -61,10 +61,11 @@ fun Drawer(viewModel: SessionViewModel) {
                             Color.Gray
                     )
         ) {
-            DefaultProfileIcon(
-                    modifier = Modifier.padding(16.dp),
-                    onClick = { DrawerState.toggleDrawer() },
-                    imageBase64 = profilePicture
+            ProfileIcon(
+                modifier = Modifier.padding(16.dp),
+                onClick = { DrawerState.toggleDrawer() },
+                imageBase64 = profilePicture,
+                isDarkMode = darkMode
             )
 
             Text(

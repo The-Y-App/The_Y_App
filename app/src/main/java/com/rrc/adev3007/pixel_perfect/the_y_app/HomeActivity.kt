@@ -28,7 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.BottomNavBar
-import com.rrc.adev3007.pixel_perfect.the_y_app.components.DefaultProfileIcon
+import com.rrc.adev3007.pixel_perfect.the_y_app.components.ProfileIcon
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.Drawer
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.DrawerState
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.FloatingCreatePostButton
@@ -82,12 +82,14 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    DefaultProfileIcon(
+                    ProfileIcon(
                         modifier = Modifier
                             .padding(16.dp)
                             .align(Alignment.TopStart),
+                        iconSize = 36.dp,
                         onClick = { DrawerState.toggleDrawer() },
-                        imageBase64 = profilePicture
+                        imageBase64 = profilePicture,
+                        isDarkMode = darkMode
                     )
                     Text(
                         text = "y",
@@ -127,7 +129,8 @@ class HomeActivity : ComponentActivity() {
                 BottomNavBar(
                     navController = navController,
                     currentRoute = currentRoute,
-                    modifier = Modifier.padding(horizontal = 30.dp)
+                    modifier = Modifier.padding(horizontal = 30.dp),
+                    viewModel = sessionViewModel
                 )
             }
             FloatingCreatePostButton(sessionViewModel, postViewModel)

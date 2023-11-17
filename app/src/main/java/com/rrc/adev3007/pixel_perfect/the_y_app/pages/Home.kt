@@ -34,7 +34,7 @@ fun Home(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
             PostItem(
                 name = "${posts[index].firstName} ${posts[index].lastName}",
                 username = "@${posts[index].firstName}",
-                profileImage = posts[index].media,
+                profileImage = posts[index].profileImg,
                 time = convertToRelativeTime(posts[index].createdAt),
                 content = posts[index].content,
                 modifier = Modifier

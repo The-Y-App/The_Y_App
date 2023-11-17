@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rrc.adev3007.pixel_perfect.the_y_app.R
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 
 @Composable
@@ -43,62 +42,52 @@ fun PostItem(
                 }
             )
         ) {
-            ProfileIcon(
-                drawableRes = R.drawable.jimmy,
-                iconSize =
-                when (scale) {
-                    ScalingLevel.Small -> 34.dp
-                    ScalingLevel.Normal -> 38.dp
-                    else -> 42.dp
-                },
-                    modifier = Modifier
-                        )
-                        Column {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(
-                                    when (scale) {
-                                        ScalingLevel.Small -> 3.dp
-                                        ScalingLevel.Normal -> 5.dp
-                                        else -> 7.dp
-                                    }
-                                )
-                            ) {
-                                Text(
-                                    text = name,
-                                    color = if(darkMode) Color.White else Color.Black,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = when (scale) {
-                                        ScalingLevel.Small -> 10.sp
-                                        ScalingLevel.Normal -> 12.sp
-                                        else -> 14.sp
-                                    }
-                                )
-
-                                Text(
-                                    text = "$username · $time",
-                                    color = if(darkMode) Color.White else Color.Black,
-                                    fontSize = when (scale) {
-                                        ScalingLevel.Small -> 9.sp
-                                        ScalingLevel.Normal -> 10.sp
-                                        else -> 11.sp
-                                    }
-                                )
-                            }
-
-                            Text(
-                                text = content,
-                                color = if(darkMode) Color.White else Color.Black,
-                                fontSize = when (scale) {
-                                    ScalingLevel.Small -> 9.sp
-                                    ScalingLevel.Normal -> 11.sp
-                                    else -> 13.sp
-                                }
-                            )
+            ProfileIcon(imageBase64 = profileImage, isDarkMode = viewModel.darkMode.value)
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        when (scale) {
+                            ScalingLevel.Small -> 3.dp
+                            ScalingLevel.Normal -> 5.dp
+                            else -> 7.dp
                         }
-                }
-        }
+                    )
+                ) {
+                    Text(
+                        text = name,
+                        color = if(darkMode) Color.White else Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = when (scale) {
+                            ScalingLevel.Small -> 10.sp
+                            ScalingLevel.Normal -> 12.sp
+                            else -> 14.sp
+                        }
+                    )
 
+                    Text(
+                        text = "$username · $time",
+                        color = if(darkMode) Color.White else Color.Black,
+                        fontSize = when (scale) {
+                            ScalingLevel.Small -> 9.sp
+                            ScalingLevel.Normal -> 10.sp
+                            else -> 11.sp
+                        }
+                    )
+                }
+
+                Text(
+                    text = content,
+                    color = if(darkMode) Color.White else Color.Black,
+                    fontSize = when (scale) {
+                        ScalingLevel.Small -> 9.sp
+                        ScalingLevel.Normal -> 11.sp
+                        else -> 13.sp
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Preview
