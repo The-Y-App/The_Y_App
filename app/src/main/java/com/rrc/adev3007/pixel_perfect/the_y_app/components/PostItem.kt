@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
@@ -40,7 +41,8 @@ fun PostItem(
     content: String,
     modifier: Modifier,
     viewModel: SessionViewModel,
-    postId: Int
+    postId: Int,
+    isDownvoted: Boolean
 ) {
     val darkMode by viewModel.darkMode
     val profanityFilter by viewModel.profanityFilter
@@ -122,30 +124,34 @@ fun PostItem(
                             }
                         ),
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.default_downvote),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(
-                            width = 18.dp + when (scale) {
-                                ScalingLevel.Small -> 7.dp
-                                ScalingLevel.Normal -> 10.dp
-                                else -> 13.dp
-                            },
-                            height = 18.dp + when (scale) {
-                                ScalingLevel.Small -> 7.dp
-                                ScalingLevel.Normal -> 10.dp
-                                else -> 13.dp
-                            }
-                        )
-                        .clickable {
-                            viewModel.downVote(postId)
-                    }
-                )
+                // Downvote Arrow - Default
+                    Image(
+                        painter = if(isDownvoted) painterResource(id = R.drawable.default_downvote_filled) else painterResource(id = R.drawable.default_downvote),
+                        contentDescription = null,
+                        colorFilter = if(viewModel.darkMode.value) ColorFilter.tint(Color.White) else ColorFilter.tint(Color.Black),
+                        modifier = Modifier
+                            .size(
+                                width = 18.dp + when (scale) {
+                                    ScalingLevel.Small -> 7.dp
+                                    ScalingLevel.Normal -> 10.dp
+                                    else -> 13.dp
+                                },
+                                height = 18.dp + when (scale) {
+                                    ScalingLevel.Small -> 7.dp
+                                    ScalingLevel.Normal -> 10.dp
+                                    else -> 13.dp
+                                }
+                            )
+                            .clickable {
+                                if(isDownvoted) viewModel.downVote(postId) else viewModel.downVote(postId)
+                        }
+                    )
 
+                // Upvote ARROW - Default
                 Image(
                     painter = painterResource(id = R.drawable.default_downvote),
                     contentDescription = null,
+                    colorFilter = if(viewModel.darkMode.value) ColorFilter.tint(Color.White) else ColorFilter.tint(Color.Black),
                     modifier = Modifier
                         .size(
                             width = 18.dp + when (scale) {
@@ -179,6 +185,7 @@ fun PreviewPost() {
         content = "This is the post content",
         modifier = Modifier,
         viewModel = SessionViewModel(null),
-        postId = 1
+        postId = 1,
+        isDownvoted = true
     )
 }

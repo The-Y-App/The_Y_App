@@ -14,7 +14,10 @@ data class Post(
     @SerializedName("created_at")
     val createdAt: String,
     @SerializedName("post_id")
-    val postId: Int
+    val postId: Int,
+    @SerializedName("is_downvoted")
+    val isDownvoted: Boolean,
+    val downvotes: Int
 )
 
 data class CreatePostRequest(
