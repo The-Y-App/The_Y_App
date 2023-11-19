@@ -12,7 +12,9 @@ data class Post(
     val content: String,
     val media: String?,
     @SerializedName("created_at")
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("post_id")
+    val postId: Int
 )
 
 data class CreatePostRequest(
