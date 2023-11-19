@@ -16,21 +16,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rrc.adev3007.pixel_perfect.the_y_app.R
+import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 
 @Composable
 fun BottomNavBar(
     navController: NavController,
     modifier: Modifier = Modifier,
-    currentRoute: String? = "Home"
+    currentRoute: String? = "Home",
+    viewModel: SessionViewModel
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.Black)
+            .background(
+                if (viewModel.darkMode.value) Color.Black
+                else Color.White
+            )
     ) {
         Row(
             modifier = Modifier
@@ -46,6 +50,7 @@ fun BottomNavBar(
                 },
                 isSelected = currentRoute == "Home",
                 contentDescription = currentRoute,
+                isDarkMode = viewModel.darkMode.value
             )
             BottomNavItem(
                 iconRes = R.drawable.search,
@@ -54,6 +59,7 @@ fun BottomNavBar(
                 },
                 isSelected = currentRoute == "Search",
                 contentDescription = currentRoute,
+                isDarkMode = viewModel.darkMode.value
             )
             BottomNavItem(
                 iconRes = R.drawable.thumbs_down,
@@ -62,6 +68,7 @@ fun BottomNavBar(
                 },
                 isSelected = currentRoute == "Dislikes",
                 contentDescription = currentRoute,
+                isDarkMode = viewModel.darkMode.value
             )
         }
     }
@@ -73,10 +80,8 @@ fun BottomNavItem(
     onClick: () -> Unit,
     isSelected: Boolean,
     contentDescription: String?,
+    isDarkMode: Boolean,
 ) {
-    val iconPainter = painterResource(id = iconRes)
-    val tint = if (isSelected) Color.White else Color.Gray
-
     IconToggleButton(
         checked = isSelected,
         onCheckedChange = { if (!isSelected) onClick() },
@@ -85,9 +90,13 @@ fun BottomNavItem(
             .clip(CircleShape)
     ) {
         Icon(
-            painter = iconPainter,
+            painter = painterResource(id = iconRes),
             contentDescription = "$contentDescription Icon",
-            tint = tint
+            tint =
+                if (isSelected)
+                    if (isDarkMode) Color.White
+                    else Color.Black
+                else Color.Gray
         )
     }
 }

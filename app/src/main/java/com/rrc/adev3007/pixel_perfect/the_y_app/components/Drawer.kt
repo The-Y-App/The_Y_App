@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.google.gson.Gson
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.Media
@@ -50,18 +50,22 @@ fun Drawer(viewModel: SessionViewModel) {
         val scale by viewModel.scale
         val profilePicture by viewModel.profilePicture
         Column(
-                modifier =
-                        Modifier.zIndex(100f)
-                                .fillMaxHeight()
-                                .fillMaxWidth(0.5f)
-                                .background(
-                                        if (darkMode) Color.hsv(0f, 0f, 0.1f, 1f) else Color.Gray
-                                )
+                modifier = Modifier
+                    .zIndex(100f)
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.5f)
+                    .background(
+                        if (darkMode)
+                            Color.hsv(0f, 0f, 0.1f, 1f)
+                        else
+                            Color.Gray
+                    )
         ) {
-            DefaultProfileIcon(
-                    modifier = Modifier.padding(16.dp),
-                    onClick = { DrawerState.toggleDrawer() },
-                    imageBase64 = profilePicture
+            ProfileIcon(
+                modifier = Modifier.padding(16.dp),
+                onClick = { DrawerState.toggleDrawer() },
+                imageBase64 = profilePicture,
+                isDarkMode = darkMode
             )
 
             Text(
@@ -151,20 +155,18 @@ fun Drawer(viewModel: SessionViewModel) {
                     color = if (darkMode) Color.White else Color.Black
             )
 
-            //            SettingButton(
-            //                    text = "Log Out",
-            //                    onClick = {
-            //                        viewModel.logOut()
-            //                        // TODO: navigate to login screen
-            //                    },
-            //                    fontSize = when (scale) {
-            //                        ScalingLevel.Small -> 10.sp
-            //                        ScalingLevel.Normal -> 12.sp
-            //                        else -> 14.sp
-            //                    },
-            //                    color = if (darkMode) Color.White
-            //                    else Color.Black // Set font color
-            //            )
+            Text(
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 16.dp)
+                    .clickable { viewModel.logOut() },
+                text = "Log Out",
+                fontSize = when (scale) {
+                    ScalingLevel.Small -> 10.sp
+                    ScalingLevel.Normal -> 12.sp
+                    else -> 14.sp
+                },
+                color = if (darkMode) Color.White else Color.Black
+            )
         }
     }
 }

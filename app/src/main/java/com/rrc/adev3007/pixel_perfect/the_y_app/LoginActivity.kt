@@ -25,7 +25,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import android.content.Intent
-import android.util.Log
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
@@ -33,17 +32,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rrc.adev3007.pixel_perfect.the_y_app.components.ScalingLevel
-import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.UserAuth
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
-import kotlinx.coroutines.launch
 
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewModel = SessionViewModel(applicationContext)
+        viewModel.loginCallback = {
+            startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+            finish()
+        }
         setContent {
             LoginScreen(viewModel)
         }
@@ -59,42 +59,7 @@ fun LoginScreen(viewModel: SessionViewModel) {
     }
     val activity = LocalContext.current as Activity
     var isLoading by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    var errorString by remember { mutableStateOf<String>("") }
-
-    if (activity.intent.extras != null) {
-        val extras = activity.intent.extras
-        if (extras?.containsKey("CreatedUser") == true) {
-            val createdUser = extras.getSerializable("CreatedUser") as? UserAuth
-            createdUser?.let { userAuth ->
-                LaunchedEffect(userAuth) {
-                    try {
-                        coroutineScope.launch {
-                            val response = Synchronizer.api.postLogin(userAuth)
-                            if (response.isSuccessful) {
-                                val userAccount = response.body()
-                                viewModel.setAPIKey(userAccount?.apiKey.toString())
-                                viewModel.updateUsername(userAuth.username)
-                                viewModel.updateEmail(userAccount?.email.toString())
-                                viewModel.updateFirstName(userAccount?.firstName.toString())
-                                viewModel.updateLastName(userAccount?.lastName.toString())
-                                viewModel.updateScale((ScalingLevel.valueOf(userAccount?.uiScale.toString())))
-                                viewModel.updateProfilePicture(userAccount?.profilePicture?.toString())
-                                activity.finish()
-                                activity.startActivity(Intent(activity, HomeActivity::class.java))
-                            } else {
-                                // TODO add something here if need
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("LoginScreen", "Login failed: ${e.message}")
-                    }
-                }
-            }
-        }
-    }
-
-
+    val errorString = viewModel.loginError.value
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -112,13 +77,13 @@ fun LoginScreen(viewModel: SessionViewModel) {
             )
             Text(text = "Welcome Back", fontSize = 24.sp)
             Spacer(modifier = Modifier.padding(bottom = 24.dp))
-            if (!errorString.isEmpty()) Text(text = errorString, color = Color.Red)
+            if (errorString.isNotEmpty()) Text(text = errorString, color = Color.Red)
             OutlinedTextField(
                 value = username,
                 label = { Text(text = "Username") },
                 onValueChange = {
                     username = it
-                    errorString = ""
+                    viewModel.setLoginError("")
                 },
                 placeholder = { Text(text = "Enter Username") },
                 shape = RoundedCornerShape(12.dp),
@@ -133,7 +98,7 @@ fun LoginScreen(viewModel: SessionViewModel) {
                     label = { Text(text = "Password") },
                     onValueChange = {
                         password = it
-                        errorString = ""
+                        viewModel.setLoginError("")
                     },
                     placeholder = { Text(text = "Enter Password") },
                     shape = RoundedCornerShape(12.dp),
@@ -189,36 +154,14 @@ fun LoginScreen(viewModel: SessionViewModel) {
             ) {
                 Button(
                     onClick = {
-                        try {
-                            isLoading = true
-                            coroutineScope.launch {
-                                val loginAuth = UserAuth(username, password)
-                                val response = Synchronizer.api.postLogin(loginAuth)
-                                if (response.isSuccessful) {
-                                    val userAccount = response.body()
-                                    viewModel.setAPIKey(userAccount?.apiKey.toString())
-                                    viewModel.updateUsername(username)
-                                    viewModel.updateEmail(userAccount?.email.toString())
-                                    viewModel.updateFirstName(userAccount?.firstName.toString())
-                                    viewModel.updateLastName(userAccount?.lastName.toString())
-                                    viewModel.updateScale((ScalingLevel.valueOf(userAccount?.uiScale.toString())))
-                                    viewModel.updateProfilePicture(userAccount?.profilePicture?.toString())
-                                    activity.finish()
-                                    activity.startActivity(
-                                        Intent(
-                                            activity,
-                                            HomeActivity::class.java
-                                        )
-                                    )
-                                } else {
-                                    Log.e("loginError", response.code().toString())
-                                    errorString = "Username or password is incorrect!"
-                                }
-                                isLoading = false
-                            }
-                        } catch (e: Exception) {
-                            Log.e("LoginScreen", "Login failed: ${e.message}")
-                        }
+                        isLoading = true
+                        viewModel.logIn(
+                            UserAuth(
+                                username = username,
+                                password = password
+                            )
+                        )
+                        isLoading = false
                     },
                     enabled = !isLoading,
                     modifier = Modifier

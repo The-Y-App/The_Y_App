@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import com.rrc.adev3007.pixel_perfect.the_y_app.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
@@ -155,11 +154,15 @@ fun NewPostForm(sessionViewModel: SessionViewModel, postViewModel: PostViewModel
                                 .padding(vertical =  5.dp, horizontal = 15.dp))
                     }
                 }
-                    Row(modifier = Modifier.padding(top = 5.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                    ) {
                         ProfileIcon(
-                            drawableRes = R.drawable.person,
-                            iconSize = 38.dp,
-                            modifier = Modifier.padding(bottom = 35.dp)
+                            imageBase64 = sessionViewModel.profilePicture.value,
+                            iconSize = 28.dp,
+                            modifier = Modifier.padding(bottom = 35.dp, end = 10.dp),
+                            isDarkMode = sessionViewModel.darkMode.value
                         )
                         BasicTextField(
                             value = text,

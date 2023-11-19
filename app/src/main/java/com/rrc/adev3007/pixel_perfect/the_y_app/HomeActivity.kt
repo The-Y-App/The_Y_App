@@ -1,5 +1,6 @@
 package com.rrc.adev3007.pixel_perfect.the_y_app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,7 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.BottomNavBar
-import com.rrc.adev3007.pixel_perfect.the_y_app.components.DefaultProfileIcon
+import com.rrc.adev3007.pixel_perfect.the_y_app.components.ProfileIcon
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.Drawer
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.DrawerState
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.FloatingCreatePostButton
@@ -42,6 +43,7 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 * Experimental API's used:
 * androidx.compose.ui.platform.LocalSoftwareKeyboardController:
 *       NewPostForm.kt:62
+*       Search.kt:36
 */
 class HomeActivity : ComponentActivity() {
     @ExperimentalComposeUiApi
@@ -49,6 +51,10 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val postViewModel = PostViewModel()
         val sessionViewModel = SessionViewModel(applicationContext)
+        sessionViewModel.logoutCallback = {
+            startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
+            finish()
+        }
         setContent {
             HomeScreen(sessionViewModel, postViewModel)
         }
@@ -76,12 +82,14 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    DefaultProfileIcon(
+                    ProfileIcon(
                         modifier = Modifier
                             .padding(16.dp)
                             .align(Alignment.TopStart),
+                        iconSize = 36.dp,
                         onClick = { DrawerState.toggleDrawer() },
-                        imageBase64 = profilePicture
+                        imageBase64 = profilePicture,
+                        isDarkMode = darkMode
                     )
                     Text(
                         text = "y",
@@ -115,13 +123,14 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.weight(1f)
                 ) {
                     composable("Home") { Home(postViewModel, sessionViewModel) }
-                    composable("Search") { Search() }
+                    composable("Search") { Search(postViewModel, sessionViewModel) }
                     composable("Dislikes") { Dislikes() }
                 }
                 BottomNavBar(
                     navController = navController,
                     currentRoute = currentRoute,
-                    modifier = Modifier.padding(horizontal = 30.dp)
+                    modifier = Modifier.padding(horizontal = 30.dp),
+                    viewModel = sessionViewModel
                 )
             }
             FloatingCreatePostButton(sessionViewModel, postViewModel)
