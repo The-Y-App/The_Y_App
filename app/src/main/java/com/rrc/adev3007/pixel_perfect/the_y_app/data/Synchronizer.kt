@@ -60,7 +60,7 @@ interface ISynchronizer {
     ) : Response<Response<Map<String,String>>>
 }
 
-private const val BASE_URL = "http://192.168.100.101:5000/api/"
+private const val BASE_URL = "https://the-y-app-api.azurewebsites.net/api/"
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(GsonConverterFactory.create())
