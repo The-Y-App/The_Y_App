@@ -175,4 +175,26 @@ class SessionViewModel(context: Context?) : ViewModel() {
             }
         }
     }
+
+    fun downVote(postId: Int){
+        viewModelScope.launch {
+            val response = Synchronizer.api.addPostDislike(
+                postId,
+                mapOf("username" to username.value, "api_key" to apiKey.value)
+                )
+            if (response.isSuccessful) {
+
+            }
+        }
+    }
+
+    fun deleteDownvote(postId: Int) {
+        viewModelScope.launch {
+            val response = Synchronizer.api.deleteDownvote(
+                postId,
+                mapOf("username" to username.value, "api_key" to apiKey.value)
+            )
+            response.isSuccessful
+        }
+    }
 }
