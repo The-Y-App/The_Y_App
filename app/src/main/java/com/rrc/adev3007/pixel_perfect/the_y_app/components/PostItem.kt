@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rrc.adev3007.pixel_perfect.the_y_app.R
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.viewModels.PostViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 
 @Composable
@@ -36,6 +37,7 @@ fun PostItem(
     content: String,
     modifier: Modifier,
     viewModel: SessionViewModel,
+    postViewModel: PostViewModel,
     postId: Int,
     initialIsDownvoted: Boolean
 ) {
@@ -140,10 +142,18 @@ fun PostItem(
                             )
                             .clickable {
                                 isDownvoted = if(!isDownvoted) {
-                                    viewModel.downVote(postId)
+                                    postViewModel.downVote(
+                                        postId,
+                                        viewModel.username.value,
+                                        viewModel.apiKey.value
+                                    )
                                     true
                                 } else {
-                                    viewModel.deleteDownvote(postId)
+                                    postViewModel.deleteDownvote(
+                                        postId,
+                                        viewModel.username.value,
+                                        viewModel.apiKey.value
+                                    )
                                     false
                                 }
                             }
@@ -187,6 +197,7 @@ fun PreviewPost() {
         content = "This is the post content",
         modifier = Modifier,
         viewModel = SessionViewModel(null),
+        postViewModel = PostViewModel(),
         postId = 1,
         initialIsDownvoted = true
     )

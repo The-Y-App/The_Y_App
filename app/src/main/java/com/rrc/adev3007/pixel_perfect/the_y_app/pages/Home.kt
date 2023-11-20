@@ -54,6 +54,7 @@ fun Home(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
                         end = 16.dp
                     ),
                 viewModel = sessionViewModel,
+                postViewModel = viewModel,
                 postId =  post.postId,
                 initialIsDownvoted = post.isDownvoted
             )
