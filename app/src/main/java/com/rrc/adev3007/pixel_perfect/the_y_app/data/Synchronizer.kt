@@ -22,7 +22,8 @@ interface ISynchronizer {
     @GET("post")
     suspend fun getPosts(
         @Query("username") username: String,
-        @Query("api_key") api_key: String
+        @Query("api_key") api_key: String,
+        @Query("search") search: String? = null
     ) : Response<List<Post>>
 
     @PUT("post")
