@@ -1,29 +1,24 @@
 package com.rrc.adev3007.pixel_perfect.the_y_app.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,11 +37,12 @@ fun PostItem(
     modifier: Modifier,
     viewModel: SessionViewModel,
     postId: Int,
-    isDownvoted: Boolean
+    initialIsDownvoted: Boolean
 ) {
     val darkMode by viewModel.darkMode
     val profanityFilter by viewModel.profanityFilter
     val scale by viewModel.scale
+    var isDownvoted by rememberSaveable { mutableStateOf(initialIsDownvoted) }
 
     Box(
         modifier
@@ -143,32 +139,38 @@ fun PostItem(
                                 }
                             )
                             .clickable {
-                                if(isDownvoted) viewModel.downVote(postId) else viewModel.downVote(postId)
-                        }
-                    )
-
-                // Upvote ARROW - Default
-                Image(
-                    painter = painterResource(id = R.drawable.default_downvote),
-                    contentDescription = null,
-                    colorFilter = if(viewModel.darkMode.value) ColorFilter.tint(Color.White) else ColorFilter.tint(Color.Black),
-                    modifier = Modifier
-                        .size(
-                            width = 18.dp + when (scale) {
-                                ScalingLevel.Small -> 7.dp
-                                ScalingLevel.Normal -> 10.dp
-                                else -> 13.dp
-                            },
-                            height = 18.dp + when (scale) {
-                                ScalingLevel.Small -> 7.dp
-                                ScalingLevel.Normal -> 10.dp
-                                else -> 13.dp
+                                isDownvoted = if(!isDownvoted) {
+                                    viewModel.downVote(postId)
+                                    true
+                                } else {
+                                    viewModel.deleteDownvote(postId)
+                                    false
+                                }
                             }
-                        )
-                        .graphicsLayer {
-                            this.rotationZ = 180f
-                        }
-                )
+                    )
+//
+//                // Upvote ARROW - Default
+//                Image(
+//                    painter = painterResource(id = R.drawable.default_downvote),
+//                    contentDescription = null,
+//                    colorFilter = if(viewModel.darkMode.value) ColorFilter.tint(Color.White) else ColorFilter.tint(Color.Black),
+//                    modifier = Modifier
+//                        .size(
+//                            width = 18.dp + when (scale) {
+//                                ScalingLevel.Small -> 7.dp
+//                                ScalingLevel.Normal -> 10.dp
+//                                else -> 13.dp
+//                            },
+//                            height = 18.dp + when (scale) {
+//                                ScalingLevel.Small -> 7.dp
+//                                ScalingLevel.Normal -> 10.dp
+//                                else -> 13.dp
+//                            }
+//                        )
+//                        .graphicsLayer {
+//                            this.rotationZ = 180f
+//                        }
+//                )
             }
         }
     }
@@ -186,6 +188,6 @@ fun PreviewPost() {
         modifier = Modifier,
         viewModel = SessionViewModel(null),
         postId = 1,
-        isDownvoted = true
+        initialIsDownvoted = true
     )
 }

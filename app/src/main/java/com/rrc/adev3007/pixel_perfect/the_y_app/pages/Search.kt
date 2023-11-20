@@ -117,7 +117,7 @@ fun Search(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
                         ),
                     viewModel = sessionViewModel,
                     postId = posts[index].postId,
-                    isDownvoted = posts[index].isDownvoted
+                    initialIsDownvoted = posts[index].isDownvoted
                 )
                 Spacer(
                     modifier = Modifier
