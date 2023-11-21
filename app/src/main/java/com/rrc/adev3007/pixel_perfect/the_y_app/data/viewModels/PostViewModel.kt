@@ -30,4 +30,22 @@ class PostViewModel() : ViewModel() {
             }
         }
     }
+
+    fun downVote(postId: Int, username: String, apiKey: String){
+        viewModelScope.launch {
+            Synchronizer.api.addPostDislike(
+                postId,
+                mapOf("username" to username, "api_key" to apiKey)
+            )
+        }
+    }
+
+    fun deleteDownvote(postId: Int, username: String, apiKey: String) {
+        viewModelScope.launch {
+            Synchronizer.api.deleteDownvote(
+                postId,
+                mapOf("username" to username, "api_key" to apiKey)
+            )
+        }
+    }
 }
