@@ -1,5 +1,7 @@
 package com.rrc.adev3007.pixel_perfect.the_y_app.pages
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,15 +21,31 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.components.PostItem
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.viewModels.PostViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.helpers.convertToRelativeTime
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
-fun Home(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
+fun Home(viewModel: PostViewModel, sessionViewModel: SessionViewModel, context: Context) {
     val posts by viewModel.homePosts
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
-        if (posts.isEmpty()) {
-            viewModel.getHomePosts(sessionViewModel.username.value, sessionViewModel.apiKey.value)
+        var isSuccessful = false
+        if (posts.isEmpty() && !viewModel.isFetchInProgress.value) {
+            withContext(Dispatchers.IO) {
+                isSuccessful = viewModel.getHomePosts(
+                    sessionViewModel.username.value,
+                    sessionViewModel.apiKey.value
+                )
+
+            }
+        }
+        if (!isSuccessful && posts.isEmpty()) {
+            Toast.makeText(
+                context,
+                "There appears to be a network error, please try again later",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
     LaunchedEffect(posts) {

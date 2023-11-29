@@ -115,31 +115,35 @@ class SessionViewModel(context: Context?) : ViewModel() {
 
         if (registerErrors.value.isEmpty()) {
             viewModelScope.launch {
-                val response = Synchronizer.api.postUser(formData)
-                if (response.isSuccessful) {
-                    logIn(
-                        UserAuth(
-                            formData.username,
-                            formData.password
+                val response = Synchronizer.api {
+                    postUser(formData)
+                }
+                if (response != null) {
+                    if (response.isSuccessful) {
+                        logIn(
+                            UserAuth(
+                                formData.username,
+                                formData.password
+                            )
                         )
-                    )
-                } else {
-                    if (response.code() == 409) {
-                        val updatedErrors = registerErrors.value.toMutableMap()
-                        updatedErrors["username"] = "Username already in use"
-                        setRegisterErrors(updatedErrors)
-                    }
+                    } else {
+                        if (response.code() == 409) {
+                            val updatedErrors = registerErrors.value.toMutableMap()
+                            updatedErrors["username"] = "Username already in use"
+                            setRegisterErrors(updatedErrors)
+                        }
 
-                    if(response.code() == 416){
-                        val updatedErrors = registerErrors.value.toMutableMap()
-                        updatedErrors["email"] = "Email already in use"
-                        setRegisterErrors(updatedErrors)
-                    }
+                        if(response.code() == 416){
+                            val updatedErrors = registerErrors.value.toMutableMap()
+                            updatedErrors["email"] = "Email already in use"
+                            setRegisterErrors(updatedErrors)
+                        }
 
-                    if (response.code() == 400) {
-                        val updatedErrors = registerErrors.value.toMutableMap()
-                        updatedErrors["fields"] = "Required Fields are Missing"
-                        setRegisterErrors(updatedErrors)
+                        if (response.code() == 400) {
+                            val updatedErrors = registerErrors.value.toMutableMap()
+                            updatedErrors["fields"] = "Required Fields are Missing"
+                            setRegisterErrors(updatedErrors)
+                        }
                     }
                 }
             }
@@ -148,30 +152,38 @@ class SessionViewModel(context: Context?) : ViewModel() {
 
     fun logIn(userAuth: UserAuth) {
         viewModelScope.launch {
-            val response = Synchronizer.api.postLogin(userAuth)
-            if (response.isSuccessful) {
-                val userAccount = response.body()
-                setApiKey(userAccount?.apiKey.toString())
-                updateUsername(userAuth.username)
-                updateEmail(userAccount?.email.toString())
-                updateFirstName(userAccount?.firstName.toString())
-                updateLastName(userAccount?.lastName.toString())
-                updateScale((ScalingLevel.valueOf(userAccount?.uiScale.toString())))
-                updateProfilePicture(userAccount?.profilePicture)
-                loginCallback?.invoke()
-            } else {
-                setLoginError("Username or password is incorrect!")
+            val response = Synchronizer.api {
+                postLogin(userAuth)
+            }
+            if (response != null) {
+                if (response.isSuccessful) {
+                    val userAccount = response.body()
+                    setApiKey(userAccount?.apiKey.toString())
+                    updateUsername(userAuth.username)
+                    updateEmail(userAccount?.email.toString())
+                    updateFirstName(userAccount?.firstName.toString())
+                    updateLastName(userAccount?.lastName.toString())
+                    updateScale((ScalingLevel.valueOf(userAccount?.uiScale.toString())))
+                    updateProfilePicture(userAccount?.profilePicture)
+                    loginCallback?.invoke()
+                } else {
+                    setLoginError("Username or password is incorrect!")
+                }
             }
         }
     }
 
     fun logOut() {
         viewModelScope.launch {
-            val response = Synchronizer.api.postLogout(UserAuthRequest(apiKey.value, username.value))
-            if (response.isSuccessful) {
-                session.clearSession()
-                DrawerState.toggleDrawer()
-                logoutCallback?.invoke()
+            val response = Synchronizer.api {
+                postLogout(UserAuthRequest(apiKey.value, username.value))
+            }
+            if (response != null) {
+                if (response.isSuccessful) {
+                    session.clearSession()
+                    DrawerState.toggleDrawer()
+                    logoutCallback?.invoke()
+                }
             }
         }
     }

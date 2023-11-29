@@ -87,19 +87,24 @@ fun Drawer(viewModel: SessionViewModel) {
                         CoroutineScope(Dispatchers.IO).launch {
                             viewModel.setProfilePic(selectedImageB64)
                             try {
-                                val response = Synchronizer.api.postMedia(Media.MediaCreate(
-                                    viewModel.username.value,
-                                    viewModel.apiKey.value,
-                                    selectedImageB64
-                                ))
-                                Log.d("Drawer.kt", "response ${response.body()!!.id}")
+                                val response = Synchronizer.
+                                api {
+                                    postMedia(Media.MediaCreate(
+                                        viewModel.username.value,
+                                        viewModel.apiKey.value,
+                                        selectedImageB64
+                                    ))
+                                }
+                                Log.d("Drawer.kt", "response ${response?.body()!!.id}")
                                 val selectedImageMediaId = response.body()!!.id
 
-                                Synchronizer.api.patchUserProfilePicture(UserProfilePicture(
-                                    viewModel.username.value,
-                                    viewModel.apiKey.value,
-                                    selectedImageMediaId
-                                ))
+                                Synchronizer.api {
+                                    patchUserProfilePicture(UserProfilePicture(
+                                        viewModel.username.value,
+                                        viewModel.apiKey.value,
+                                        selectedImageMediaId
+                                    ))
+                                }
 
                                 Log.d("Drawer.kt", "patchPFP: $selectedImageB64 len: ${selectedImageB64.length} media_id: $selectedImageMediaId")
                             } catch (e: Exception) {

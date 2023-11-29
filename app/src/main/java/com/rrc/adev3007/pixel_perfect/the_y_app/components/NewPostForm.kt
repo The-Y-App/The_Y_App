@@ -117,29 +117,31 @@ fun NewPostForm(sessionViewModel: SessionViewModel, postViewModel: PostViewModel
                         .clickable {
                             if (text != "") {
                                 coroutineScope.launch {
-                                    try {
-                                        val response = Synchronizer.api.createPost(
-                                            CreatePostRequest(
-                                                sessionViewModel.apiKey.value,
-                                                sessionViewModel.username.value,
-                                                text,
-                                                null
-                                            )
-                                        )
-                                        if (response.isSuccessful) {
-                                            postViewModel.getHomePosts(
-                                                sessionViewModel.username.value,
-                                                sessionViewModel.apiKey.value
+                                    if (!postViewModel.isFetchInProgress.value) {
+                                        val response = Synchronizer.api {
+                                            createPost(
+                                                CreatePostRequest(
+                                                    sessionViewModel.apiKey.value,
+                                                    sessionViewModel.username.value,
+                                                    text,
+                                                    null
+                                                )
                                             )
                                         }
-                                        keyboardController?.hide()
-                                        NewPostFormState.toggleForm()
-                                    } catch(ex: Exception) {
-                                        Toast.makeText(
-                                            localContext,
-                                            "Failed to create Post!",
-                                            Toast.LENGTH_LONG
-                                        ).show()
+                                        if (response != null) {
+                                            if (response.isSuccessful) {
+                                                postViewModel.getHomePosts(
+                                                    sessionViewModel.username.value,
+                                                    sessionViewModel.apiKey.value
+                                                )
+                                            }
+                                        } else {
+                                            Toast.makeText(
+                                                localContext,
+                                                "Failed to create Post!",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
                                         keyboardController?.hide()
                                         NewPostFormState.toggleForm()
                                     }

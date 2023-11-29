@@ -1,5 +1,7 @@
 package com.rrc.adev3007.pixel_perfect.the_y_app.pages
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,13 +30,15 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.components.PostItem
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.viewModels.PostViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.helpers.convertToRelativeTime
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
+import kotlinx.coroutines.launch
 
 @ExperimentalComposeUiApi
 @Composable
-fun Search(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
+fun Search(viewModel: PostViewModel, sessionViewModel: SessionViewModel, context: Context) {
     val posts = viewModel.searchedPosts.value
     val query = viewModel.searchQuery
     val keyboardController = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,12 +73,21 @@ fun Search(viewModel: PostViewModel, sessionViewModel: SessionViewModel) {
             ),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    if (query.value != "") {
-                        viewModel.search(
-                            sessionViewModel.username.value,
-                            sessionViewModel.apiKey.value
-                        )
+                    if (query.value != "" && !viewModel.isFetchInProgress.value) {
                         keyboardController?.hide()
+                        coroutineScope.launch {
+                            val isSuccessful = viewModel.search(
+                                sessionViewModel.username.value,
+                                sessionViewModel.apiKey.value
+                            )
+                            if (!isSuccessful && posts.isEmpty()) {
+                                Toast.makeText(
+                                    context,
+                                    "There appears to be a network error, please try again later",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
                     }
                 }
             ),

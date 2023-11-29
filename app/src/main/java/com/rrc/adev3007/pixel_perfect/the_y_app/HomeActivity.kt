@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
@@ -32,10 +33,12 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.components.ProfileIcon
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.Drawer
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.DrawerState
 import com.rrc.adev3007.pixel_perfect.the_y_app.components.FloatingCreatePostButton
+import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.viewModels.PostViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.pages.Dislikes
 import com.rrc.adev3007.pixel_perfect.the_y_app.pages.Home
 import com.rrc.adev3007.pixel_perfect.the_y_app.pages.Search
+import com.rrc.adev3007.pixel_perfect.the_y_app.session.Session
 import com.rrc.adev3007.pixel_perfect.the_y_app.ui.theme.LogoFontFamily
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
 
@@ -52,6 +55,11 @@ class HomeActivity : ComponentActivity() {
         val postViewModel = PostViewModel()
         val sessionViewModel = SessionViewModel(applicationContext)
         sessionViewModel.logoutCallback = {
+            startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
+            finish()
+        }
+        Synchronizer.unauthorizedCallback = {
+            Session.getInstance(applicationContext)?.clearSession()
             startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
             finish()
         }
@@ -122,9 +130,9 @@ class HomeActivity : ComponentActivity() {
                     startDestination = "Home",
                     modifier = Modifier.weight(1f)
                 ) {
-                    composable("Home") { Home(postViewModel, sessionViewModel) }
-                    composable("Search") { Search(postViewModel, sessionViewModel) }
-                    composable("Dislikes") { Dislikes() }
+                    composable("Home") { Home(postViewModel, sessionViewModel, LocalContext.current) }
+                    composable("Search") { Search(postViewModel, sessionViewModel, LocalContext.current) }
+                    composable("Dislikes") { Dislikes(postViewModel, sessionViewModel, LocalContext.current) }
                 }
                 BottomNavBar(
                     navController = navController,

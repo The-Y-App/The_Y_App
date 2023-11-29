@@ -14,38 +14,61 @@ class PostViewModel() : ViewModel() {
     val searchedPosts: MutableState<List<Post>> = mutableStateOf(emptyList())
     val dislikedPosts: MutableState<List<Post>> = mutableStateOf(emptyList())
     val searchQuery: MutableState<String> = mutableStateOf("")
+    val isFetchInProgress: MutableState<Boolean> = mutableStateOf(false)
 
-    suspend fun getHomePosts(username: String, apiKey: String) {
-        val response = Synchronizer.api.getPosts(username, apiKey)
-        if (response.isSuccessful) {
-            homePosts.value = response.body() ?: emptyList()
+    suspend fun getHomePosts(username: String, apiKey: String): Boolean {
+        isFetchInProgress.value = true
+        val response = Synchronizer.api {
+            getPosts(username, apiKey)
         }
+        homePosts.value = response?.body() ?: emptyList()
+        isFetchInProgress.value = false
+        return response != null
     }
 
-    fun search(username: String, apiKey: String) {
-        viewModelScope.launch {
-            val response = Synchronizer.api.getPosts(username, apiKey, searchQuery.value)
-            if (response.isSuccessful) {
-                searchedPosts.value = response.body() ?: emptyList()
-            }
+    suspend fun search(username: String, apiKey: String): Boolean {
+        isFetchInProgress.value = true
+        val response = Synchronizer.api {
+            getPosts(username, apiKey, searchQuery.value)
         }
+        searchedPosts.value = response?.body() ?: emptyList()
+        isFetchInProgress.value = false
+        return response != null
     }
 
-    fun downVote(postId: Int, username: String, apiKey: String){
-        viewModelScope.launch {
-            Synchronizer.api.addPostDislike(
-                postId,
-                mapOf("username" to username, "api_key" to apiKey)
+    suspend fun getDislikedPosts(username: String, apiKey: String): Boolean {
+        isFetchInProgress.value = true
+        val response = Synchronizer.api {
+            getPosts(
+                username = username,
+                api_key = apiKey,
+                isDislikesOnly = true
             )
+        }
+        dislikedPosts.value = response?.body() ?: emptyList()
+        isFetchInProgress.value = false
+        return response != null
+    }
+
+    fun downVote(postId: Int, username: String, apiKey: String) {
+        viewModelScope.launch {
+            Synchronizer.api {
+                addPostDislike(
+                    postId,
+                    mapOf("username" to username, "api_key" to apiKey)
+                )
+            }
         }
     }
 
     fun deleteDownvote(postId: Int, username: String, apiKey: String) {
         viewModelScope.launch {
-            Synchronizer.api.deleteDownvote(
-                postId,
-                mapOf("username" to username, "api_key" to apiKey)
-            )
+            Synchronizer.api {
+                deleteDownvote(
+                    postId,
+                    mapOf("username" to username, "api_key" to apiKey)
+                )
+            }
         }
     }
 }
