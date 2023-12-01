@@ -86,6 +86,12 @@ object Synchronizer {
                 if (response.code() == 401) {
                     unauthorizedCallback?.invoke()
                 }
+                if (response.code() == 403) {
+                    return null
+                }
+                if (response.code() == 500) {
+                    throw Exception()
+                }
                 break
             } catch (e: Exception) {
                 attempts++

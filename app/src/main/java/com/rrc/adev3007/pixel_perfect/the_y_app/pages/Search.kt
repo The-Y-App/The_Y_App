@@ -30,7 +30,9 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.components.PostItem
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.viewModels.PostViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.helpers.convertToRelativeTime
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @ExperimentalComposeUiApi
 @Composable
@@ -73,13 +75,16 @@ fun Search(viewModel: PostViewModel, sessionViewModel: SessionViewModel, context
             ),
             keyboardActions = KeyboardActions(
                 onSearch = {
+                    var isSuccessful: Boolean
                     if (query.value != "" && !viewModel.isFetchInProgress.value) {
                         keyboardController?.hide()
                         coroutineScope.launch {
-                            val isSuccessful = viewModel.search(
-                                sessionViewModel.username.value,
-                                sessionViewModel.apiKey.value
-                            )
+                            withContext(Dispatchers.IO) {
+                                isSuccessful = viewModel.search(
+                                    sessionViewModel.username.value,
+                                    sessionViewModel.apiKey.value
+                                )
+                            }
                             if (!isSuccessful && posts.isEmpty()) {
                                 Toast.makeText(
                                     context,

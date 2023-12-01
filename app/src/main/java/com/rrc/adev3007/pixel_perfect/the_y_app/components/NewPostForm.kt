@@ -40,7 +40,10 @@ import com.rrc.adev3007.pixel_perfect.the_y_app.data.Synchronizer
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.models.CreatePostRequest
 import com.rrc.adev3007.pixel_perfect.the_y_app.data.viewModels.PostViewModel
 import com.rrc.adev3007.pixel_perfect.the_y_app.session.SessionViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 object NewPostFormState {
     var isFormOpen by mutableStateOf(false)
@@ -115,10 +118,12 @@ fun NewPostForm(sessionViewModel: SessionViewModel, postViewModel: PostViewModel
                             shape = RoundedCornerShape(50)
                         )
                         .clickable {
-                            if (text != "") {
+                            var response: Response<Any>? = null
+                            if (text != "" && !postViewModel.isFetchInProgress.value) {
+                                keyboardController?.hide()
                                 coroutineScope.launch {
-                                    if (!postViewModel.isFetchInProgress.value) {
-                                        val response = Synchronizer.api {
+                                    withContext(Dispatchers.IO) {
+                                        response = Synchronizer.api {
                                             createPost(
                                                 CreatePostRequest(
                                                     sessionViewModel.apiKey.value,
@@ -129,22 +134,22 @@ fun NewPostForm(sessionViewModel: SessionViewModel, postViewModel: PostViewModel
                                             )
                                         }
                                         if (response != null) {
-                                            if (response.isSuccessful) {
+                                            if (response!!.isSuccessful) {
                                                 postViewModel.getHomePosts(
                                                     sessionViewModel.username.value,
                                                     sessionViewModel.apiKey.value
                                                 )
                                             }
-                                        } else {
-                                            Toast.makeText(
-                                                localContext,
-                                                "Failed to create Post!",
-                                                Toast.LENGTH_LONG
-                                            ).show()
                                         }
-                                        keyboardController?.hide()
-                                        NewPostFormState.toggleForm()
                                     }
+                                    if (response == null) {
+                                        Toast.makeText(
+                                            localContext,
+                                            "Failed to create Post!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    NewPostFormState.toggleForm()
                                 }
                             }
                         }
