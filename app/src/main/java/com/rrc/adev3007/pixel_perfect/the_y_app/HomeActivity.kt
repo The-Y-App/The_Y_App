@@ -1,6 +1,7 @@
 package com.rrc.adev3007.pixel_perfect.the_y_app
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,13 +81,22 @@ class HomeActivity : ComponentActivity() {
         val navController = rememberNavController()
         val currentRoute =
             navController.currentBackStackEntryAsState().value?.destination?.route
+        val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = if(darkMode) Color.Black
             else Color.White
         ) {
-
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = if (isLandscape) {
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 25.dp)
+                } else {
+                    Modifier
+                        .fillMaxSize()
+                }
+            ) {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterStart
